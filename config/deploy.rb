@@ -58,15 +58,13 @@ task :deploy => :environment do
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
-    queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
     invoke :'rails:db_migrate'
-    invoke :'rails:assets_precompile'
-
     to :launch do
-      queue "touch #{deploy_to}/tmp/restart.txt"
       queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
+      queue %[bundle exec rake db:seed]
+      queue %[bundle exec rake spree_sample:load]
+      invoke :'rails:assets_precompile'
       queue %[bundle exec thin start -C #{deploy_to}/current/config/thin.yml]
-
     end
   end
 end
