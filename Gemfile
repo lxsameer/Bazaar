@@ -43,7 +43,7 @@ gem 'unicorn'
 
 group :development do
   gem 'mina'
-  gem 'mina-rsync'
+  gem 'mina-rsync', :require => false
 end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
