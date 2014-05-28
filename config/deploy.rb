@@ -55,6 +55,7 @@ task :deploy => :environment do
   deploy do
     # Put things that will set up an empty directory into a fully set-up
     # instance of your project.
+    queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
@@ -70,4 +71,12 @@ task :deploy => :environment do
   end
 end
 
-desc ''
+desc 'production log'
+task :plog do
+  queue %[tail -n 100 #{deploy_to}/current/log/production.log]
+end
+
+desc 'thin log'
+task :tlog do
+  queue %[tail -n 100 #{deploy_to}/current/log/thin.3000.log]
+end
