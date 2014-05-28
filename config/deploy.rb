@@ -63,14 +63,11 @@ task :deploy => :environment do
 
     to :launch do
       queue "touch #{deploy_to}/tmp/restart.txt"
-      queue %[bundle exec thin restart -C #{deploy_to}/current/config/thin.yml]
+      queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
+      queue %[bundle exec thin start -C #{deploy_to}/current/config/thin.yml]
+
     end
   end
 end
 
-# For help in making your deploy script, see the Mina documentation:
-#
-#  - http://nadarei.co/mina
-#  - http://nadarei.co/mina/tasks
-#  - http://nadarei.co/mina/settings
-#  - http://nadarei.co/mina/helpers
+desc ''
