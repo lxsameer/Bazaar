@@ -58,6 +58,7 @@ task :deploy => :environment do
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
+    queue %[rm #{deploy_to}/db/production.sqlite3]
     invoke :'rails:db_migrate'
     to :launch do
       queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
