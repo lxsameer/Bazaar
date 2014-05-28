@@ -1,14 +1,14 @@
 # Set your full path to application.
-app_path = "/home/iranmosafer/www/current/"
+app_path = "/home/demo/shop/current/"
 
 # Set unicorn options
 worker_processes 1
 preload_app true
 timeout 180
-listen "127.0.0.1:9000"
+listen "127.0.0.1:9001"
 
 # Spawn unicorn master worker for user apps (group: apps)
-user 'iranmosafer', "iranmosafer"
+user 'demo', 'demo'
 
 # Fill path to your app
 working_directory app_path
@@ -17,8 +17,8 @@ working_directory app_path
 rails_env = ENV['RAILS_ENV'] || 'production'
 
 # Log everything to one file
-stderr_path "log/unicorn.log"
-stdout_path "log/unicorn.log"
+stderr_path 'log/unicorn.log'
+stdout_path 'log/unicorn.log'
 
 # Set master PID location
 pid "#{app_path}/tmp/pids/unicorn.pid"

@@ -72,13 +72,22 @@ task :deploy => :environment do
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
     invoke :'rails:db_migrate'
+    invoke :'rails:db_seed'
+    queue "cd #{deploy_to}/current && bundle exec rake spree_sample:load"
     #invoke :'assets_precompile'
     to :launch do
       queue "touch #{deploy_to}/tmp/restart.txt"
+      queue '#{deploy_to}/current/config/unicorn_init.sh restart'
     end
   end
 end
 
+desc 'Tail the unicorn log'
+task :unilog => :environment do
+  deploy do
+    queue 'tail -n 100 #{deploy_to}/current/logs/unicorn.log'
+  end
+end
 # For help in making your deploy script, see the Mina documentation:
 #
 #  - http://nadarei.co/mina
