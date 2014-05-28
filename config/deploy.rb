@@ -17,7 +17,7 @@ set :branch, 'master'
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
-set :shared_paths, ['log']
+set :shared_paths, ['log', 'public/assets']
 
 # Optional settings:
 #   set :user, 'foobar'    # Username in the server to SSH to.
@@ -40,6 +40,7 @@ end
 # all releases.
 task :setup => :environment do
   queue! %[mkdir -p "#{deploy_to}/shared/log"]
+  queue! %[mkdir -p "#{deploy_to}/shared/public/assets"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/log"]
 
   queue! %[mkdir -p "#{deploy_to}/shared/config"]
@@ -62,8 +63,8 @@ task :deploy => :environment do
     invoke :'rails:db_migrate'
     to :launch do
       queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
-      queue %[bundle exec rake db:seed]
-      queue %[bundle exec rake spree_sample:load]
+      invoce :'rake[db:seed]'
+      invoce :'rake[spree_sample:load]'
       invoke :'rails:assets_precompile'
       queue %[bundle exec thin start -C #{deploy_to}/current/config/thin.yml]
     end
