@@ -17,7 +17,7 @@ set :branch, 'master'
 
 # Manually create these paths in shared/ (eg: shared/config/database.yml) in your server.
 # They will be linked in the 'deploy:link_shared_paths' step.
-set :shared_paths, ['log', 'public/assets']
+set :shared_paths, ['log']
 
 # Optional settings:
 #   set :user, 'foobar'    # Username in the server to SSH to.
@@ -40,7 +40,6 @@ end
 # all releases.
 task :setup => :environment do
   queue! %[mkdir -p "#{deploy_to}/shared/log"]
-  queue! %[mkdir -p "#{deploy_to}/shared/public/assets"]
   queue! %[chmod g+rx,u+rwx "#{deploy_to}/shared/log"]
 
   queue! %[mkdir -p "#{deploy_to}/shared/config"]
@@ -59,18 +58,25 @@ task :deploy => :environment do
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
-    queue %[rm #{deploy_to}/current/db/production.sqlite3]
-    invoke :'rails:db_migrate'
+    #queue %[rm #{deploy_to}/current/db/*.sqlite3]
+    #invoke :'rails:db_migrate:force'
+    #invoce :'rake[db:seed]'
+    #invoce :'rake[spree_sample:load]'
+
     to :launch do
-      queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
-      invoce :'rake[db:seed]'
-      invoce :'rake[spree_sample:load]'
+      system %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
       invoke :'rails:assets_precompile'
-      queue %[bundle exec thin start -C #{deploy_to}/current/config/thin.yml]
+      system %[bundle exec thin start -C #{deploy_to}/current/config/thin.yml]
     end
   end
 end
 
+
+desc "deploy and transfer assets files using rsync"
+task :rdeploy => :environment do
+  system %[RAILS_ENV=production bundle exec rake assets:precompile]
+  queue %[rsync -Chavz -e "ssh" ./public/assets/ demo@shop.demo.dev.yellowen.com:/home/demo/shop/public/assets/]
+end
 desc 'production log'
 task :plog do
   queue %[tail -n 100 #{deploy_to}/current/log/production.log]
