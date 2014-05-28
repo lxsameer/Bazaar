@@ -63,7 +63,7 @@ task :deploy => :environment do
 
     to :launch do
       queue "touch #{deploy_to}/tmp/restart.txt"
-      queue %[thin restart -C #{deploy_to}/current/config/thin.yml]
+      queue %[bundle exec thin restart -C #{deploy_to}/current/config/thin.yml]
     end
   end
 end
