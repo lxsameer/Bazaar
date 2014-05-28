@@ -55,10 +55,10 @@ task :deploy => :environment do
   deploy do
     # Put things that will set up an empty directory into a fully set-up
     # instance of your project.
-    queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
     invoke :'git:clone'
     invoke :'deploy:link_shared_paths'
     invoke :'bundle:install'
+    queue %[bundle exec thin stop -C #{deploy_to}/current/config/thin.yml]
     invoke :'rails:db_migrate'
     invoke :'rails:assets_precompile'
 
